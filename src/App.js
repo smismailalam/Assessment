@@ -1,44 +1,55 @@
-// import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import "./App.css";
 import 'antd/dist/antd.css';
 import { Form, Input, Button, Checkbox ,Row , Col , Typography  } from 'antd';
-// import Login from './screens/login';
 const axios = require('axios');
-let username = '';
-let password = '';
-var details = [];
-function onFinish(){
-  password = parseInt(password);
-  axios.post('https://xfoil-technical-interview.herokuapp.com/login', {
-    username,
-    password,
-  })
-  .then(function (response) {
-    alert('success')
-    console.log(response.data);
-    details.push(response.data);
-  })
-  .catch(function (error) {
-    alert('username or password is incorrect')
-    // console.log(error);
-  });
-}
-function App() {
-  return (
-    <div className="App">
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      username:'',
+      password:'',
+      details: "",
+    };
+  }
+  onFinish(){
+    let { username , password } = this.state;
+    var _this = this;
+    password = parseInt(password);
+    axios.post('https://xfoil-technical-interview.herokuapp.com/login', {
+      username,
+      password,
+    })
+    .then(function (response) {
+      console.log(response.data);
+      // details.push(response.data);
+      _this.setState({
+        details:response.data
+      })
+    })
+    .catch(function (error) {
+      // alert('username or password is incorrect')
+      console.log(error);
+    });
+  }
+  render() {
+    const { details } = this.state;
+    console.log(details)
+    return (
       <Row>
         <Col>          
         {
-          details.length > 0 ?
+          details ?
           <div>
             <Typography>First Name: { details.firstNameAdmin}</Typography>
             <Typography>Last Name: { details.lastNameAdmin}</Typography>
             <Typography>company id: { details.companyId}</Typography>
-            {
-              details.locationObjects.map( dl =>{
-                <Typography>location : { dl.locationName}</Typography>
-              })
-            }
+            {details.locationObjects.map((dl, i) => {
+              return (
+                <Typography key={i}>location : { dl.locationName}</Typography>
+              );
+            })}
           </div>
           : 
           <Form
@@ -52,14 +63,14 @@ function App() {
           initialValues={{
             remember: true,
           }}
-          onFinish={onFinish}
+          onFinish={()=> {this.onFinish()}}
           // onFinishFailed={onFinishFailed}
           autoComplete="off"
         >
           <Form.Item
             label="Username"
             name="username"
-            onChange={(e)=>{ username =  e.target.value; details = [] }}
+            onChange={(e)=>{ this.setState({ username:e.target.value,details: "" })}}
             rules={[
               {
                 required: true,
@@ -73,7 +84,7 @@ function App() {
           <Form.Item
             label="Password"
             name="password"
-            onChange={(e)=>{ password =  e.target.value; details = []}}
+            onChange={(e)=>{ this.setState({ password:e.target.value,details:"" })}}
             rules={[
               {
                 required: true,
@@ -97,9 +108,8 @@ function App() {
         </Form>
         }
         </Col>
-      </Row>      
-    </div>
-  );
+      </Row> 
+    )
+  }
 }
-
 export default App;
